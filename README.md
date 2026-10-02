@@ -68,4 +68,10 @@ npm run build
 - 字段、状态、动作与流转目标集中在 `frontend/src/data/modules.ts`；示例数据在
   `frontend/src/data/seed.ts`。
 - 状态流转只允许在 `local-service.ts` 里改，页面组件不做业务判断。
+- 浮选样品批量登记逐条即时落库；中断后整批重提会按样品编号自动跳过已登记记录，从失败行续录；
+  同一样品（库内或同批）重复提交只落一条。
+- 样品重量在登记时盖上当时的口径版本（`重量口径版本`），历史样品始终沿用登记那一版的落库值，
+  口径调整后不重算。
+- 浮选样品「确认完成」后按样品编号幂等回写浮选送检台账（localStorage 键
+  `archaeology-field:flotation-ledger`，默认空台账）。
 - 想回到初始数据：清掉浏览器里 `archaeology-field:entries` 这一项，或调用 `resetModule(模块)`。

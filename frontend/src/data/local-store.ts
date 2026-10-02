@@ -1,4 +1,5 @@
 import { SEED_ROWS } from './seed'
+import { FLOTATION_LEDGER_KEY } from './flotation'
 import type { EntryRow } from './types'
 
 // 本地持久化：数据放在 localStorage 里，刷新、关掉再打开都还在。
@@ -56,4 +57,37 @@ export function resetRows(key: string): EntryRow[] {
 
 export function storageKey(): string {
   return STORAGE_KEY
+}
+
+// 浮选送检台账：独立于业务记录单独持久化，默认空台账，由浮选完成动作回写。
+let ledgerCache: EntryRow[] | null = null
+
+function readLedger(): EntryRow[] {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return []
+  }
+  const raw = window.localStorage.getItem(FLOTATION_LEDGER_KEY)
+  if (!raw) {
+    return []
+  }
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? (parsed as EntryRow[]) : []
+  } catch {
+    return []
+  }
+}
+
+export function listLedger(): EntryRow[] {
+  if (ledgerCache === null) {
+    ledgerCache = readLedger()
+  }
+  return ledgerCache
+}
+
+export function saveLedger(rows: EntryRow[]): void {
+  ledgerCache = rows
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.setItem(FLOTATION_LEDGER_KEY, JSON.stringify(rows))
+  }
 }
